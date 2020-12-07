@@ -39,11 +39,14 @@ class SubTempNet(dict):
         self["PAT4"]={}
         self["PAT8"]={}
         
-        self["PA0_LCC"]={}
         self["PAT_LCC"]={}
+        """
         self["PAT2_LCC"]={}
         self["PAT4_LCC"]={}
         self["PAT8_LCC"]={}
+        self["PA0_LCC"]={}
+        """
+
     def drop_A(self):
         del self["A"]
         return
