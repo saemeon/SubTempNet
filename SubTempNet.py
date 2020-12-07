@@ -17,21 +17,23 @@ plt.rcParams.update({'legend.fontsize': 'x-large',
          'font.family':'STIXGeneral'
          })
 class SubTempNet(dict):
-    def __init__(self, filename, objname, directed = False):
-        """Simulator Class:
-        input: filename / path of data, name to store object
-        Storage -> key is length of timewindow
-        does: """
+    def __init__(self, filename, objname, directed = False, init = True):
+        """ 
+        filename:= path of data
+        objname:= name to store object
+        """
         self["filename"] = filename
         self["objname"] = objname+"_SubTempNet"
         self["directed"] = directed
-        A, T, ecount, ncount = self.make_A(filename, directed)
-        self["A"]=A
-        self["ecount"] = ecount
-        self["ncount"] = ncount
-        self["T"] = T
-        self["deg_seq"] = self.deg_seq(A)
-        
+        if init:
+            A, T, ecount, ncount = self.make_A(filename, directed)
+            self["A"]=A
+            self["ecount"] = ecount
+            self["ncount"] = ncount
+            self["T"] = T
+            self["deg_seq"] = self.deg_seq(A)
+        else:
+            self.load()
         #Statistics
         self["PA0"]={}
         self["PAT"]={}
