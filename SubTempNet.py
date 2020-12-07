@@ -32,23 +32,23 @@ class SubTempNet(dict):
             self["ncount"] = ncount
             self["T"] = T
             self["deg_seq"] = self.deg_seq(A)
+            
+            #Statistics
+            self["PA0"]={}
+            self["PAT"]={}
+            self["PAT2"]={}
+            self["PAT4"]={}
+            self["PAT8"]={}
+
+            self["PAT_LCC"]={}
+            """
+            self["PAT2_LCC"]={}
+            self["PAT4_LCC"]={}
+            self["PAT8_LCC"]={}
+            self["PA0_LCC"]={}
+            """
         else:
             self.load()
-        #Statistics
-        self["PA0"]={}
-        self["PAT"]={}
-        self["PAT2"]={}
-        self["PAT4"]={}
-        self["PAT8"]={}
-        
-        self["PAT_LCC"]={}
-        """
-        self["PAT2_LCC"]={}
-        self["PAT4_LCC"]={}
-        self["PAT8_LCC"]={}
-        self["PA0_LCC"]={}
-        """
-
     def drop_A(self):
         del self["A"]
         return
