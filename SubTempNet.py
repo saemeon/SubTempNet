@@ -585,7 +585,7 @@ class SubTempNet(dict):
         deg = np.array(sorted([d for n, d in AW.degree()], reverse=True))
         return deg
     @staticmethod
-    def snapshotlist_to_temporal_edgelist(snapshot_list, filename, separator='\t'):
+    def write_snapshotlist_to_edgelist(snapshotlist, filename, separator='\t'):
         """writes snapshot list with networkx networks into temporal edgelist file"""
         with open(filename, 'w') as f:
             t = 0
