@@ -589,7 +589,7 @@ class SubTempNet(dict):
         """writes snapshot list with networkx networks into temporal edgelist file"""
         with open(filename, 'w') as f:
             t = 0
-            for snapshot in snapshot_list:
+            for snapshot in snapshotlist:
                 t +=1
                 for v, w in snapshot.edges():
                     f.write(str(v) + separator + str(w) + separator + str(t)+'\n')
