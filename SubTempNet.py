@@ -593,3 +593,9 @@ class SubTempNet(dict):
                 t +=1
                 for v, w in snapshot.edges():
                     f.write(str(v) + separator + str(w) + separator + str(t)+'\n')
+    @staticmethod
+    def ChungLu(deg):
+        G = nx.expected_degree_graph(deg)
+        G = nx.Graph(G)
+        G.remove_edges_from(nx.selfloop_edges(G))
+        return G
