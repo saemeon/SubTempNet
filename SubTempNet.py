@@ -64,6 +64,7 @@ class SubTempNet(dict):
         return   
     def run(self, *T, maxsamp = 50, minsamp = 5):
         done =[]
+        reached_max = self["T"]+1 
         for t in T:
             if t ==1:
                 self["PAT"][t]=[self["ncount"]]
@@ -71,8 +72,6 @@ class SubTempNet(dict):
                 self["PAT4"][t]=[self["ncount"]]
                 self["PAT8"][t]=[self["ncount"]]
                 self["PA0"][t]=[self["ncount"]]
-                
-                
                 self["PAT_LCC"][t]=[1]
                 """
                 self["PAT2_LCC"][t]=[1]
@@ -82,7 +81,14 @@ class SubTempNet(dict):
                 """
                 done.append(t)
                 continue
-                
+            if reached_max < t:
+                self["PAT"][t]=[self["ncount"]**2]
+                self["PAT2"][t]=[self["ncount"]**2]
+                self["PAT4"][t]=[self["ncount"]**2]
+                self["PAT8"][t]=[self["ncount"]**2]
+                self["PA0"][t]=[self["ncount"]**2]
+                self["PAT_LCC"][t]=[self["ncount"]]
+                continue
             self["PAT"][t]=[]
             self["PAT2"][t]=[]
             self["PAT4"][t]=[]
@@ -96,7 +102,6 @@ class SubTempNet(dict):
             self["PAT8_LCC"][t]=[]
             self["PA0_LCC"][t]=[]
             """
-            
             samplenum = 0
             samples = self.sample_TN(t, maxsamp = maxsamp, minsamp = minsamp)
             for samplestart, sampleend in samples:
@@ -132,6 +137,8 @@ class SubTempNet(dict):
                     print("Done with samplelengths ",done)
                     print("Analyzing sample number",samplenum, "for samplelength ", t, "and ",k, "slices") 
             done.append(t)
+            if np.mean(self["PA0"][t]) == self["ncount"]**2:
+                reached_max = t
     def sample_TN(self, samplelength, maxsamp = -1, minsamp = 5):
         def intervals(steps =1):
             intlen = samplelength
