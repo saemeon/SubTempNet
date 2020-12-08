@@ -120,6 +120,8 @@ class SubTempNet(dict):
                                 
                 #PATk calculates accessibility of subaggregated network sample
                 for k in [2,4,8]:
+                    if t < k: #temporal network is shorter than aggregation window
+                        continue
                     slicelengh = t//k ##????
                     slices= self.slice_TN(slicelengh, samplestart, sampleend)
                     AL = []
@@ -239,7 +241,6 @@ class SubTempNet(dict):
         _,PAT4= zip(*sorted(zip(*(x,PAT4))))
         PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
         x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        
         #make plot
         fig,ax=self.init_plt("cA0AT")
         ax.set_xlim((1,max(x))) 
