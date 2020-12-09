@@ -271,11 +271,11 @@ class SubTempNet(dict):
     def plot_LCC(self, normalize=False, save = False, ACC = True):
         #prepare data
         if normalize:
-            s=self["ncount"]
+            s=self["ncount"]**2
         else:
             s=1
         x = list([key for key,val in self["PAT"].items()])
-        PAT_LCC =  list([np.mean(LCC)/s for t,LCC in self["PAT_LCC"].items()])
+        PAT_LCC =  list([(np.mean(LCC)**2)/s for t,LCC in self["PAT_LCC"].items()])
         x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
         
         """
@@ -306,7 +306,8 @@ class SubTempNet(dict):
             if normalize:
                 s=self["ncount"]**2
             x = list([key for key,val in self["PAT"].items()])
-            PAT =  list([((np.mean(y)-self["ncount"])/s)**0.5 for t,y in self["PAT"].items()])
+            PAT =  list([((np.mean(y)-self["ncount"])/s)**1 for t,y in self["PAT"].items()])
+            #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
             plt.plot(x,PAT, linestyle, label = "PAT")
 
