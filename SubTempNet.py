@@ -225,30 +225,37 @@ class SubTempNet(dict):
     def get_static(self):
         return self.aggregate_Matrices(self["A"])
     def plot_PA(self, normalize=False, save = False, LCC = True):
-        #prepare data
+
+        fig,ax=self.init_plt("cA0AT")
+        linestyle = "--*"
         if normalize:
             s=self["ncount"]**2
         else:
             s=1
+        
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([np.mean(y)/s for t,y in self["PAT"].items()])
-        _,PAT= zip(*sorted(zip(*(x,PAT))))
+        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        plt.plot(x,PAT, linestyle, label = "L=T")
+        
+        x = list([key for key,val in self["PA0"].items()])
         PA0 =  list([np.mean(y)/s for t,y in self["PA0"].items()])
-        _,PA0= zip(*sorted(zip(*(x,PA0))))
+        x,PA0= zip(*sorted(zip(*(x,PA0))))
+        plt.plot(x,PA0, linestyle, label = "L=1")
+        
+        x = list([key for key,val in self["PAT2"].items()])
         PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
         _,PAT2= zip(*sorted(zip(*(x,PAT2))))
+        plt.plot(x,PAT2, linestyle, label = "L= T/2")
+        
+        x = list([key for key,val in self["PAT4"].items()])
         PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
         _,PAT4= zip(*sorted(zip(*(x,PAT4))))
+        plt.plot(x,PAT4, linestyle, label = "L= T/4")
+        
+        x = list([key for key,val in self["PAT8"].items()])
         PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
         x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        #make plot
-        fig,ax=self.init_plt("cA0AT")
-        ax.set_xlim((1,max(x))) 
-        linestyle = "--*"
-        plt.plot(x,PAT, linestyle, label = "L=T")
-        plt.plot(x,PA0, linestyle, label = "L=1")
-        plt.plot(x,PAT2, linestyle, label = "L= T/2")
-        plt.plot(x,PAT4, linestyle, label = "L= T/4")
         plt.plot(x,PAT8, linestyle, label = "L= T/8")  
         
         #LCC
