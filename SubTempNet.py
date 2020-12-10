@@ -84,11 +84,11 @@ class SubTempNet(dict):
                 self["PAT_LCC"][t]=[self["ncount"]]
                 continue
             self["PAT"][t]=[]
-            self["PAT2"][t]=[]
-            self["PAT4"][t]=[]
-            self["PAT8"][t]=[]
-            self["PA0"][t]=[]
             self["PAT_LCC"][t]=[]
+            self["PA0"][t]=[]
+            for k in [2,4,8]:
+                    if k <= t: #temporal network is longer than aggregation window
+                        self["PAT"+str(k)][t]=[]
             samplenum = 0
             samples = self.sample_TN(t, maxsamp = maxsamp, minsamp = minsamp)
             for samplestart, sampleend in samples:
@@ -218,25 +218,25 @@ class SubTempNet(dict):
         x,PAT= zip(*sorted(zip(*(x,PAT))))
         plt.plot(x,PAT, linestyle, label = "L=T")
         
-        x = list([key for key,val in self["PA0"].items()])
-        PA0 =  list([np.mean(y)/s for t,y in self["PA0"].items()])
-        x,PA0= zip(*sorted(zip(*(x,PA0))))
-        plt.plot(x,PA0, linestyle, label = "L=1")
-        
         x = list([key for key,val in self["PAT2"].items()])
         PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
-        _,PAT2= zip(*sorted(zip(*(x,PAT2))))
+        x,PAT2= zip(*sorted(zip(*(x,PAT2))))
         plt.plot(x,PAT2, linestyle, label = "L= T/2")
         
         x = list([key for key,val in self["PAT4"].items()])
         PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
-        _,PAT4= zip(*sorted(zip(*(x,PAT4))))
+        x,PAT4= zip(*sorted(zip(*(x,PAT4))))
         plt.plot(x,PAT4, linestyle, label = "L= T/4")
         
         x = list([key for key,val in self["PAT8"].items()])
         PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
         x,PAT8= zip(*sorted(zip(*(x,PAT8))))
         plt.plot(x,PAT8, linestyle, label = "L= T/8")  
+        
+        x = list([key for key,val in self["PA0"].items()])
+        PA0 =  list([np.mean(y)/s for t,y in self["PA0"].items()])
+        x,PA0= zip(*sorted(zip(*(x,PA0))))
+        plt.plot(x,PA0, linestyle, label = "L=1")
         
         #LCC
         if LCC:
@@ -308,27 +308,35 @@ class SubTempNet(dict):
                 fig.savefig("")
         return  ax
     def plot_cA0AT(self,  save = False): 
-        #prepare data
-        x = list([key for key,val in self["PAT"].items()])
-        PAT =  list([np.mean(y)for t,y in self["PAT"].items()])
-        _,PAT= zip(*sorted(zip(*(x,PAT))))
-        PA0 =  list([np.mean(y)for t,y in self["PA0"].items()])
-        _,PA0= zip(*sorted(zip(*(x,PA0))))
-        PAT2 = list([np.mean(y)for t,y in self["PAT2"].items()])
-        _,PAT2= zip(*sorted(zip(*(x,PAT2))))
-        PAT4 = list([np.mean(y)for t,y in self["PAT4"].items()])
-        _,PAT4= zip(*sorted(zip(*(x,PAT4))))
-        PAT8 = list([np.mean(y)for t,y in self["PAT8"].items()])
-        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        
-        #make plot
         fig,ax=self.init_plt("cA0AT")
-        ax.set_xlim((1,max(x))) 
         linestyle = "--*"
-        ax.plot(x,list(np.array(PA0)/np.array(PAT)),linestyle, label = "L= T")
-        ax.plot(x,list(np.array(PA0)/np.array(PAT2)), linestyle, label = "L= T/2")
-        ax.plot(x,list(np.array(PA0)/np.array(PAT4)),linestyle, label = "L= T/4")
-        ax.plot(x,list(np.array(PA0)/np.array(PAT8)),linestyle, label = "L= T/8")
+        
+        PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
+
+        x = list([key for key,val in self["PAT"].items()])
+        PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
+        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        ax.plot(x,PAT,linestyle, label = "L= T")
+
+        
+        x = list([key for key,val in self["PAT2"].items()])
+        PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
+        x,PAT2= zip(*sorted(zip(*(x,PAT2))))
+        ax.plot(x,PAT2, linestyle, label = "L= T/2")
+        
+        x = list([key for key,val in self["PAT4"].items()])
+        PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
+        x,PAT4= zip(*sorted(zip(*(x,PAT4))))
+        ax.plot(x,PAT4,linestyle, label = "L= T/4")
+        
+        x = list([key for key,val in self["PAT8"].items()])
+        PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
+        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
+        ax.plot(x,PAT8,linestyle, label = "L= T/8")
+        
+        #
+        #
+        #
         ax.legend()
         fig.tight_layout()
         
