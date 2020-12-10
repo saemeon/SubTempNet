@@ -73,12 +73,6 @@ class SubTempNet(dict):
                 self["PAT8"][t]=[self["ncount"]]
                 self["PA0"][t]=[self["ncount"]]
                 self["PAT_LCC"][t]=[1]
-                """
-                self["PAT2_LCC"][t]=[1]
-                self["PAT4_LCC"][t]=[1]
-                self["PAT8_LCC"][t]=[1]
-                self["PA0_LCC"][t]=[1]
-                """
                 done.append(t)
                 continue
             if reached_max < t:
@@ -94,14 +88,7 @@ class SubTempNet(dict):
             self["PAT4"][t]=[]
             self["PAT8"][t]=[]
             self["PA0"][t]=[]
-
             self["PAT_LCC"][t]=[]
-            """
-            self["PAT2_LCC"][t]=[]
-            self["PAT4_LCC"][t]=[]
-            self["PAT8_LCC"][t]=[]
-            self["PA0_LCC"][t]=[]
-            """
             samplenum = 0
             samples = self.sample_TN(t, maxsamp = maxsamp, minsamp = minsamp)
             for samplestart, sampleend in samples:
@@ -110,7 +97,6 @@ class SubTempNet(dict):
                 #PA0 calculates accessibility of original temporal network sample
                 PA0 = self.unfold_accessibility(self["A"][samplestart:sampleend])
                 self["PA0"][t].append(PA0.nnz)
-                #self["PA0_LCC"][t].append(self.LCC_size(PA0))
                 
                 #PAT calculates accessibility of fully aggregated network sample
                 AT= self.aggregate_Matrices(self["A"][samplestart:sampleend])
@@ -132,7 +118,6 @@ class SubTempNet(dict):
                             
                     PATk = self.unfold_accessibility(AL)
                     self["PAT"+str(k)][t].append(PATk.nnz) 
-                    #self["PAT"+str(k)+"_LCC"][t].append(self.LCC_size(PATk))
                     
                     #print status update
                     clear_output()
