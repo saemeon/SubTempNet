@@ -212,11 +212,6 @@ class SubTempNet(dict):
         print('ncount = 	' + str(self['ncount']))
         print('ecount = 	' + str(self['ecount']))
         print('T = 		' + str(self['T']))
-        print('Tcomp = 	' + str(self['Tcomp']))
-        try:
-            print("cA0AT = 	"+str(*self["cA0AT"][self["T"]]))
-        except:
-            pass
         return ""
     def get_dictionary(self):
         dic = {}
@@ -384,25 +379,6 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
         return  ax
-
-    def plot_activity(self, save = False):
-        fig, ax = plt.subplots()
-        ax.plot(*zip(*self['active edges'].items()))
-        ax.set_xlabel('t')
-        ax.set_ylabel('active edges')
-        fig.tight_layout()
-        if save:
-            fig.savefig("plots/"+self["objname"][:-11]+"_edgeactivity.png")
-    def plot_density(self, save = False):
-        fig, ax = plt.subplots()
-        x,y = zip(*self['active edges'].items())
-        n = self['ncount']
-        ax.plot(x,[e /(n*(n-1))  for e in y], linestyle='None', marker='+')
-        ax.set_xlabel('t')
-        ax.set_ylabel(r'$\rho$')
-        fig.tight_layout()
-        if save:
-            fig.savefig("plots/"+self["objname"][:-11]+"_density.png")
     @staticmethod
     def init_plt(cf):
         fig, ax = plt.subplots()
