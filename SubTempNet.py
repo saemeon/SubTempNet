@@ -308,7 +308,11 @@ class SubTempNet(dict):
                 fig.savefig("")
         return  ax
     def plot_cA0AT(self,  save = False): 
-        fig,ax=self.init_plt("cA0AT")
+        fig, ax = plt.subplots()
+        ax.set_xscale("log")
+        ax.set_yscale("linear")
+        ax.set_ylabel(r'$c_{\mathcal{A},\mathbf{A}}$')
+        ax.set_xlabel("T")
         linestyle = "--*"
         
         PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
@@ -318,7 +322,6 @@ class SubTempNet(dict):
         x,PAT= zip(*sorted(zip(*(x,PAT))))
         ax.plot(x,PAT,linestyle, label = "L= T")
 
-        
         x = list([key for key,val in self["PAT2"].items()])
         PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
         x,PAT2= zip(*sorted(zip(*(x,PAT2))))
@@ -333,45 +336,40 @@ class SubTempNet(dict):
         PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
         x,PAT8= zip(*sorted(zip(*(x,PAT8))))
         ax.plot(x,PAT8,linestyle, label = "L= T/8")
-        
-        #
-        #
-        #
+
         ax.legend()
         fig.tight_layout()
         
         #save plot
         if save:
                 fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
-        return  ax
+        return
     def plot_cA0AL(self, *T, save = False):  
-        #prepare data
-        x = list([key for key,val in self["PAT"].items()])
-        PAT =  list([np.mean(y)for t,y in self["PAT"].items()])
-        _,PAT= zip(*sorted(zip(*(x,PAT))))
-        PA0 =  list([np.mean(y)for t,y in self["PA0"].items()])
-        _,PA0= zip(*sorted(zip(*(x,PA0))))
-        PAT2 = list([np.mean(y)for t,y in self["PAT2"].items()])
-        _,PAT2= zip(*sorted(zip(*(x,PAT2))))
-        PAT4 = list([np.mean(y)for t,y in self["PAT4"].items()])
-        _,PAT4= zip(*sorted(zip(*(x,PAT4))))
-        PAT8 = list([np.mean(y)for t,y in self["PAT8"].items()])
-        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        
-        #make plot
-        fig, ax = self.init_plt("cA0AL")
-        ax.set_xlim((1,max(x)))
-        ax.set_ylim((None,None))
+        fig, ax = plt.subplots()
+        ax.set_xscale("log")
+        ax.set_yscale("linear")
+        ax.set_ylabel(r'$c_{\mathcal{A},\mathcal{A}_L}$')
+        ax.set_xlabel("L")
         linestyle = "--*"
+
+        x = list([key for key,val in self["PAT8"].items()])
+        
         for t in T:
-            ax.plot([x[t],x[t]/2,x[t]/4,x[t]/8,1],[list(np.array(PA0)/np.array(PAT))[t],list(np.array(PA0)/np.array(PAT2))[t],list(np.array(PA0)/np.array(PAT4))[t],list(np.array(PA0)/np.array(PAT8))[t],1],linestyle, label = "T= "+str(x[t]))
+            t= x[t]
+            ax.plot([t,t/2,t/4,t/8, 1],[np.mean(self["PA0"][t])/np.mean(self["PAT"][t]),
+                                                    np.mean(self["PA0"][t])/np.mean(self["PAT2"][t]),
+                                                    np.mean(self["PA0"][t])/np.mean(self["PAT4"][t]),
+                                                    np.mean(self["PA0"][t])/np.mean(self["PAT8"][t]),
+                                                    1],
+                    linestyle, label = "T= "+str(t))
+        
         ax.legend()
         fig.tight_layout()
         
         #save plot
         if save:
-                fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
-        return  ax
+                fig.savefig("plots/" + self["objname"][:-11]+"_cA0AL")
+        return
     @staticmethod
     def init_plt(cf):
         fig, ax = plt.subplots()
