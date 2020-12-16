@@ -358,7 +358,7 @@ class SubTempNet(dict):
         ax.set_xlabel("L")
         linestyle = "--*"
 
-        x = list([key for key,val in self["PAT8"].items()])
+        x = sorted(list([key for key,val in self["PAT8"].items()]))
         
         for t in T:
             t= x[t]
