@@ -205,9 +205,13 @@ class SubTempNet(dict):
     def get_static(self):
         return self.aggregate_Matrices(self["A"])
     def plot_PA(self, normalize=False, save = False, LCC = True):
-
-        fig,ax=self.init_plt("cA0AT")
+        fig, ax = plt.subplots()
+        ax.set_xscale("log")
+        ax.set_yscale("linear")
+        ax.set_ylabel("PA")  
+        ax.set_xlabel("T")
         linestyle = "--*"
+        
         if normalize:
             s=self["ncount"]**2
         else:
@@ -247,8 +251,8 @@ class SubTempNet(dict):
             x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
             plt.plot(x,PAT_LCC, linestyle, label = "LCC")
         
-        ax.set_ylabel("PA")  
         ax.legend()
+        ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
         #save plot
@@ -256,7 +260,13 @@ class SubTempNet(dict):
                 fig.savefig("")
         return  ax
     def plot_LCC(self, normalize=False, save = False, ACC = True):
-        #prepare data
+        fig, ax = plt.subplots()
+        ax.set_xscale("log")
+        ax.set_yscale("linear")
+        ax.set_ylabel("LCC")  
+        ax.set_xlabel("T")
+        linestyle = "--*"
+        
         if normalize:
             s=self["ncount"]**2
         else:
@@ -276,10 +286,6 @@ class SubTempNet(dict):
         x,PAT8_LCC= zip(*sorted(zip(*(x,PAT8_LCC))))
         """
         
-        #make plot
-        fig,ax=self.init_plt("cA0AT")
-        ax.set_xlim((1,max(x))) 
-        linestyle = "--*"
         plt.plot(x,PAT_LCC, linestyle, label = "LCC")
         
         """
@@ -293,14 +299,13 @@ class SubTempNet(dict):
             if normalize:
                 s=self["ncount"]**2
             x = list([key for key,val in self["PAT"].items()])
-            PAT =  list([((np.mean(y)-self["ncount"])/s)**1 for t,y in self["PAT"].items()])
+            PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
             plt.plot(x,PAT, linestyle, label = "PAT")
-
         
-        ax.set_ylabel("LCC")  
         ax.legend()
+        ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
         #save plot
@@ -338,6 +343,7 @@ class SubTempNet(dict):
         ax.plot(x,PAT8,linestyle, label = "L= T/8")
 
         ax.legend()
+        ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
         #save plot
@@ -364,6 +370,7 @@ class SubTempNet(dict):
                     linestyle, label = "T= "+str(t))
         
         ax.legend()
+        ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
         #save plot
