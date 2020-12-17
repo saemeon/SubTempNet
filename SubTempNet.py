@@ -39,14 +39,7 @@ class SubTempNet(dict):
             self["PAT2"]={}
             self["PAT4"]={}
             self["PAT8"]={}
-
             self["PAT_LCC"]={}
-            """
-            self["PAT2_LCC"]={}
-            self["PAT4_LCC"]={}
-            self["PAT8_LCC"]={}
-            self["PA0_LCC"]={}
-            """
         else:
             self.load()
     def drop_A(self):
@@ -252,8 +245,8 @@ class SubTempNet(dict):
             plt.plot(x,PAT_LCC, linestyle, label = "LCC")
         
         ax.legend()
-        ax.tick_params(which = 'major', axis='both', width=1.5, length = 10, labelsize=20, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1.5, length = 5, labelsize=20, direction='in')
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
@@ -288,6 +281,8 @@ class SubTempNet(dict):
             plt.plot(x,PAT, linestyle, label = "PAT")
         
         ax.legend()
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
@@ -299,7 +294,7 @@ class SubTempNet(dict):
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
-        ax.set_ylabel(r'$c_{\mathcal{A},\mathbf{A}}$')
+        ax.set_ylabel(r'$c$')
         ax.set_xlabel("T")
         linestyle = "--*"
         
@@ -326,6 +321,8 @@ class SubTempNet(dict):
         ax.plot(x,PAT8,linestyle, label = "L= T/8")
 
         ax.legend()
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
@@ -353,6 +350,8 @@ class SubTempNet(dict):
                     linestyle, label = "T= "+str(t))
         
         ax.legend()
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
