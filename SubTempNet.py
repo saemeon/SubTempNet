@@ -9,10 +9,10 @@ import pickle
 from IPython.display import clear_output
 plt.rcParams.update({'legend.fontsize': 'x-large',
           'figure.figsize': (6, 4),
-         'axes.labelsize': '26',
-         'axes.titlesize':'32',
-         'xtick.labelsize':'26',
-         'ytick.labelsize':'26',
+         'axes.labelsize': '20',
+         'axes.titlesize':'20',
+         'xtick.labelsize':'20',
+         'ytick.labelsize':'20',
          'mathtext.fontset':'stix',
          'font.family':'STIXGeneral'
          })
@@ -208,7 +208,7 @@ class SubTempNet(dict):
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
-        ax.set_ylabel("PA")  
+        ax.set_ylabel(r'$\rho$')  
         ax.set_xlabel("T")
         linestyle = "--*"
         
@@ -244,7 +244,7 @@ class SubTempNet(dict):
         
         #LCC
         if LCC:
-            if normalize:
+            if normalize: 
                 s=self["ncount"]
             x = list([key for key,val in self["PAT"].items()])
             PAT_LCC =  list([np.mean(LCC)/s for t,LCC in self["PAT_LCC"].items()])
@@ -252,6 +252,8 @@ class SubTempNet(dict):
             plt.plot(x,PAT_LCC, linestyle, label = "LCC")
         
         ax.legend()
+        ax.tick_params(which = 'major', axis='both', width=1.5, length = 10, labelsize=20, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1.5, length = 5, labelsize=20, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
@@ -263,7 +265,7 @@ class SubTempNet(dict):
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
-        ax.set_ylabel("LCC")  
+        ax.set_ylabel(r'$G$')  
         ax.set_xlabel("T")
         linestyle = "--*"
         
@@ -274,26 +276,7 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT_LCC =  list([(np.mean(LCC)**2)/s for t,LCC in self["PAT_LCC"].items()])
         x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
-        
-        """
-        PA0_LCC =  list([np.mean(LCC)/s for t,LCC in self["PA0_LCC"].items()])
-        _,PA0_LCC= zip(*sorted(zip(*(x,PA0_LCC))))
-        PAT2_LCC = list([np.mean(LCC)/s for t,LCC in self["PAT2_LCC"].items()])
-        _,PAT2_LCC= zip(*sorted(zip(*(x,PAT2_LCC))))
-        PAT4_LCC = list([np.mean(LCC)/s for t,LCC in self["PAT4_LCC"].items()])
-        _,PAT4_LCC= zip(*sorted(zip(*(x,PAT4_LCC))))
-        PAT8_LCC = list([np.mean(LCC)/s for t,LCC in self["PAT8_LCC"].items()])
-        x,PAT8_LCC= zip(*sorted(zip(*(x,PAT8_LCC))))
-        """
-        
         plt.plot(x,PAT_LCC, linestyle, label = "LCC")
-        
-        """
-        plt.plot(x,PA0_LCC, linestyle, label = "L=1")
-        plt.plot(x,PAT2_LCC, linestyle, label = "L= T/2")
-        plt.plot(x,PAT4_LCC, linestyle, label = "L= T/4")
-        plt.plot(x,PAT8_LCC, linestyle, label = "L= T/8")  
-        """
         
         if ACC:
             if normalize:
@@ -436,79 +419,6 @@ class SubTempNet(dict):
     def LCC_size(M, verbose = False):
         LCC = max(nx.connected_components(nx.from_scipy_sparse_matrix(M)), key=len)
         return len(LCC)
-    def LCC_size_complexnetworks(M, verbose = False):
-        #create Network
-        ncount=M.shape[0]
-        M=nx.from_scipy_sparse_matrix(M, create_using=nx.MultiDiGraph())
-        n = pp.Network(directed=True)
-        for i in range(ncount):
-            n.add_node(i)
-        for (i,j) in M.edges():
-            n.add_edge(i, j)
-        
-        #Calculate LCC
-        i = 1
-        dfs_num = {}
-        low_link = {}
-        stack = []
-        components = {}
-        component_sizes = {}
-
-        def tarjan_visit(network, v):
-            # Recursive method of Tarjan's algorithm that generates all nodes that are in the same (strongly) connected component as node v
-            nonlocal dfs_num
-            nonlocal low_link
-            nonlocal stack
-            nonlocal i
-            nonlocal components
-            nonlocal component_sizes
-
-            # start with node v
-            dfs_num[v] = i
-            low_link[v] = i
-            stack.append(v)
-            i += 1
-
-            # for all successors w of v, recursively call function
-            # if w has not been previously discovered
-            for w in network.successors[v]:
-                # if w has not been previously discovered
-                # recursively apply tarjan_visit to w
-                if w not in dfs_num:
-                    tarjan_visit(network, w)
-
-                    # update low_link[v] since we can reach w from v
-                    low_link[v] = min(low_link[v], low_link[w])
-
-                # we discovered a link to an already discovered node w
-                elif w in stack:
-
-                    # update low_link[v] since we can reach w from v
-                    low_link[v] = min(low_link[v], dfs_num[w])
-
-            # a "root" node completed a DFS traversal
-            if low_link[v] == dfs_num[v]:
-                # stack contains nodes that are in same 
-                # strongly connected component as v
-                components[v] = set()
-                while True:
-                    x = stack.pop()
-                    components[v].add(x)
-                    if x == v:
-                        break
-                component_sizes[v] = len(components[v])
-
-        for v in n.nodes:
-            # visit node if it has not been visited yet
-            if v not in dfs_num:
-                tarjan_visit(n, v)
-
-        if verbose:        
-            print(components)
-            for v in n.nodes:
-                print('{0} -> ({1}, {2})'.format(v, dfs_num[v], low_link[v]))
-
-        return max(component_sizes.values())
         
     @staticmethod
     def save_obj(obj, name ):
