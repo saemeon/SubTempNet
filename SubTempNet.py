@@ -330,6 +330,45 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
         return
+    def plot_min(self, save = False):  
+        fig, ax = plt.subplots()
+        ax.set_ylabel(r'$min(c)$')
+        ax.set_xlabel("T/L")
+        linestyle = "--*"
+        M = []
+        L = [1,2,4,8]
+        PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
+
+        x = list([key for key,val in self["PAT"].items()])
+        PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
+        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        M.append(min(PAT))
+
+        x = list([key for key,val in self["PAT2"].items()])
+        PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
+        x,PAT2= zip(*sorted(zip(*(x,PAT2))))
+        M.append(min(PAT2))
+        
+        x = list([key for key,val in self["PAT4"].items()])
+        PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
+        x,PAT4= zip(*sorted(zip(*(x,PAT4))))
+        M.append(min(PAT4))
+        
+        x = list([key for key,val in self["PAT8"].items()])
+        PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
+        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
+        M.append(min(PAT8))
+        
+        ax.plot(L,M,linestyle)
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
+        ax.set_ylim(0, ax.set_ylim()[1])
+        fig.tight_layout()
+        
+        #save plot
+        if save:
+                fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
+        return
     def plot_cA0AL(self, *T, save = False):  
         fig, ax = plt.subplots()
         ax.set_xscale("log")
