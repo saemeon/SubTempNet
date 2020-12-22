@@ -205,6 +205,8 @@ class SubTempNet(dict):
         ax.set_ylabel(r'$\rho$')  
         ax.set_xlabel("T")
         linestyle = "--*"
+        colrange = [1,2,3,4,5]
+        colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
         
         if normalize:
             s=self["ncount"]**2
@@ -214,28 +216,28 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([np.mean(y)/s for t,y in self["PAT"].items()])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
-        plt.plot(x,PAT, linestyle, label = "L=T")
+        plt.plot(x,PAT, linestyle, color = colo[0], label = r'$I=1$')
         
         if sub:
             x = list([key for key,val in self["PAT2"].items()])
             PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
             x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-            plt.plot(x,PAT2, linestyle, label = "L= T/2")
+            plt.plot(x,PAT2, linestyle, color = colo[1], label = r'$I=3$')
 
             x = list([key for key,val in self["PAT4"].items()])
             PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
             x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-            plt.plot(x,PAT4, linestyle, label = "L= T/4")
+            plt.plot(x,PAT4, linestyle, color = colo[2], label = r'$I=4$')
 
             x = list([key for key,val in self["PAT8"].items()])
             PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
             x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-            plt.plot(x,PAT8, linestyle, label = "L= T/8")  
+            plt.plot(x,PAT8, linestyle, color = colo[3], label = r'$I=8$')  
         
         x = list([key for key,val in self["PA0"].items()])
         PA0 =  list([np.mean(y)/s for t,y in self["PA0"].items()])
         x,PA0= zip(*sorted(zip(*(x,PA0))))
-        plt.plot(x,PA0, linestyle, label = "L=1")
+        plt.plot(x,PA0, linestyle, color = colo[4], label = r'$I=T$')
         
         #LCC
         if LCC:
@@ -265,6 +267,8 @@ class SubTempNet(dict):
         ax.set_ylabel(r'$G$')  
         ax.set_xlabel("T")
         linestyle = "--*"
+        colrange = [1,2,3,4,5]
+        colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
         
         if normalize:
             s=self["ncount"]**2
@@ -282,7 +286,7 @@ class SubTempNet(dict):
             PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
-            plt.plot(x,PAT, linestyle, label = r'$\rho$')
+            plt.plot(x,PAT, linestyle, color = colo[0], label = r'$\rho$')
         if vline:
             for (x,col,label) in vline:
                 ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
@@ -303,29 +307,31 @@ class SubTempNet(dict):
         ax.set_ylabel(r'$c$')
         ax.set_xlabel("T")
         linestyle = "--*"
+        colrange = [1,2,3,4,5]
+        colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
         
         PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
 
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
-        ax.plot(x,PAT,linestyle, label = "L= T")
+        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$I=1$')
         
         if sub:
             x = list([key for key,val in self["PAT2"].items()])
             PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
             x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-            ax.plot(x,PAT2, linestyle, label = "L= T/2")
+            ax.plot(x,PAT2, linestyle, color = colo[1], label = r'$I=2$')
 
             x = list([key for key,val in self["PAT4"].items()])
             PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
             x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-            ax.plot(x,PAT4,linestyle, label = "L= T/4")
+            ax.plot(x,PAT4,linestyle, color = colo[2], label = r'$I=4$')
 
             x = list([key for key,val in self["PAT8"].items()])
             PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
             x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-            ax.plot(x,PAT8,linestyle, label = "L= T/8")
+            ax.plot(x,PAT8,linestyle, color = colo[3], label = r'$I=8$')
         if vline:
             for (x,col,label) in vline:
                 ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
@@ -342,7 +348,7 @@ class SubTempNet(dict):
     def plot_min(self, save = False):  
         fig, ax = plt.subplots()
         ax.set_ylabel(r'$min(c)$')
-        ax.set_xlabel("T/L")
+        ax.set_xlabel(r'$I$')
         linestyle = "--*"
         M = []
         L = [1,2,4,8]
