@@ -8,11 +8,12 @@ import scipy.optimize as opt
 import pickle
 from IPython.display import clear_output
 plt.rcParams.update({'legend.fontsize': 'x-large',
-          'figure.figsize': (6, 4),
-         'axes.labelsize': '20',
-         'axes.titlesize':'20',
-         'xtick.labelsize':'20',
-         'ytick.labelsize':'20',
+         'figure.figsize': (6, 4),
+         'axes.labelsize': '22',
+         'axes.titlesize':'22',
+         'legend.fontsize': 20,
+         'xtick.labelsize':'22',
+         'ytick.labelsize':'22',
          'mathtext.fontset':'stix',
          'font.family':'STIXGeneral'
          })
@@ -197,7 +198,7 @@ class SubTempNet(dict):
         return dic
     def get_static(self):
         return self.aggregate_Matrices(self["A"])
-    def plot_PA(self, normalize=False, save = False, LCC = True):
+    def plot_PA(self, normalize=False, sub = True, save = False, LCC = True, vline = False):
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
@@ -215,20 +216,21 @@ class SubTempNet(dict):
         x,PAT= zip(*sorted(zip(*(x,PAT))))
         plt.plot(x,PAT, linestyle, label = "L=T")
         
-        x = list([key for key,val in self["PAT2"].items()])
-        PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
-        x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-        plt.plot(x,PAT2, linestyle, label = "L= T/2")
-        
-        x = list([key for key,val in self["PAT4"].items()])
-        PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
-        x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-        plt.plot(x,PAT4, linestyle, label = "L= T/4")
-        
-        x = list([key for key,val in self["PAT8"].items()])
-        PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
-        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        plt.plot(x,PAT8, linestyle, label = "L= T/8")  
+        if sub:
+            x = list([key for key,val in self["PAT2"].items()])
+            PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
+            x,PAT2= zip(*sorted(zip(*(x,PAT2))))
+            plt.plot(x,PAT2, linestyle, label = "L= T/2")
+
+            x = list([key for key,val in self["PAT4"].items()])
+            PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
+            x,PAT4= zip(*sorted(zip(*(x,PAT4))))
+            plt.plot(x,PAT4, linestyle, label = "L= T/4")
+
+            x = list([key for key,val in self["PAT8"].items()])
+            PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
+            x,PAT8= zip(*sorted(zip(*(x,PAT8))))
+            plt.plot(x,PAT8, linestyle, label = "L= T/8")  
         
         x = list([key for key,val in self["PA0"].items()])
         PA0 =  list([np.mean(y)/s for t,y in self["PA0"].items()])
@@ -243,7 +245,9 @@ class SubTempNet(dict):
             PAT_LCC =  list([np.mean(LCC)/s for t,LCC in self["PAT_LCC"].items()])
             x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
             plt.plot(x,PAT_LCC, linestyle, label = "LCC")
-        
+        if vline:
+            for (x,col,label) in vline:
+                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.legend()
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
@@ -254,7 +258,7 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("")
         return  ax
-    def plot_LCC(self, normalize=False, save = False, ACC = True):
+    def plot_LCC(self, normalize=False, vline = False, save = False, ACC = True):
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
@@ -269,7 +273,7 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT_LCC =  list([(np.mean(LCC)**2)/s for t,LCC in self["PAT_LCC"].items()])
         x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
-        plt.plot(x,PAT_LCC, linestyle, label = "LCC")
+        plt.plot(x,PAT_LCC, linestyle, label = r'$G^2$')
         
         if ACC:
             if normalize:
@@ -278,8 +282,10 @@ class SubTempNet(dict):
             PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
-            plt.plot(x,PAT, linestyle, label = "PAT")
-        
+            plt.plot(x,PAT, linestyle, label = r'$\rho$')
+        if vline:
+            for (x,col,label) in vline:
+                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.legend()
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
@@ -290,7 +296,7 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("")
         return  ax
-    def plot_cA0AT(self,  save = False): 
+    def plot_cA0AT(self, sub = True, vline = False, save = False): 
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
@@ -304,22 +310,25 @@ class SubTempNet(dict):
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
         ax.plot(x,PAT,linestyle, label = "L= T")
-
-        x = list([key for key,val in self["PAT2"].items()])
-        PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
-        x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-        ax.plot(x,PAT2, linestyle, label = "L= T/2")
         
-        x = list([key for key,val in self["PAT4"].items()])
-        PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
-        x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-        ax.plot(x,PAT4,linestyle, label = "L= T/4")
-        
-        x = list([key for key,val in self["PAT8"].items()])
-        PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
-        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        ax.plot(x,PAT8,linestyle, label = "L= T/8")
+        if sub:
+            x = list([key for key,val in self["PAT2"].items()])
+            PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
+            x,PAT2= zip(*sorted(zip(*(x,PAT2))))
+            ax.plot(x,PAT2, linestyle, label = "L= T/2")
 
+            x = list([key for key,val in self["PAT4"].items()])
+            PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
+            x,PAT4= zip(*sorted(zip(*(x,PAT4))))
+            ax.plot(x,PAT4,linestyle, label = "L= T/4")
+
+            x = list([key for key,val in self["PAT8"].items()])
+            PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
+            x,PAT8= zip(*sorted(zip(*(x,PAT8))))
+            ax.plot(x,PAT8,linestyle, label = "L= T/8")
+        if vline:
+            for (x,col,label) in vline:
+                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.legend()
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
@@ -514,6 +523,14 @@ class SubTempNet(dict):
         h = np.log(1-(np.log(n)/n))/np.log(1-p)
         l = np.log(1-(1/n)) /np.log(1-p)
         return (h*l)**0.5
+    @staticmethod
+    def TC1(n,p):
+        l = np.log(1-(1/n)) /np.log(1-p)
+        return l
+    @staticmethod
+    def TC2(n,p):
+        h = np.log(1-(np.log(n)/n))/np.log(1-p)
+        return h
     @staticmethod
     def deg_seq(A):
         W=SubTempNet.aggregate_Matrices(A, weighted = True)
