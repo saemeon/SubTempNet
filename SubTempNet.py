@@ -245,7 +245,7 @@ class SubTempNet(dict):
         if vline:
             for (x,col,label) in vline:
                 ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
-        ax.legend()
+        plt.legend(handlelength = 0.8, handletextpad=0.2)
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
@@ -335,31 +335,32 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
-        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$1$')
+        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$I=1$')
         
         if sub:
             x = list([key for key,val in self["PAT2"].items()])
             PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
             x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-            ax.plot(x,PAT2, linestyle, color = colo[1], label = r'$2$')
+            ax.plot(x,PAT2, linestyle, color = colo[1], label = r'$I=2$')
 
             x = list([key for key,val in self["PAT4"].items()])
             PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
             x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-            ax.plot(x,PAT4,linestyle, color = colo[2], label = r'$4$')
+            ax.plot(x,PAT4,linestyle, color = colo[2], label = r'$I=4$')
 
             x = list([key for key,val in self["PAT8"].items()])
             PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
             x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-            ax.plot(x,PAT8,linestyle, color = colo[3], label = r'$8$')
+            ax.plot(x,PAT8,linestyle, color = colo[3], label = r'$I=8$')
             
             x = list([key for key,val in self["PA0"].items()])
             PA0 = list([PA0[t]/np.mean(self["PA0"][t]) for t in x])
             x,PA0= zip(*sorted(zip(*(x,PA0))))
-            ax.plot(x,PA0,linestyle, color = colo[4], label = r'$T$')
+            ax.plot(x,PA0,linestyle, color = colo[4], label = r'$I=T$')
         if rho:
-            #axin = ax.inset_axes([0.13, 0.165, 0.42, 0.5]) #ER
-            axin = ax.inset_axes([0.57, 0.165, 0.42, 0.45]) #SBM
+            axin = ax.inset_axes([0.13, 0.16, 0.39, 0.45]) #ER
+            #axin = ax.inset_axes([0.57, 0.165, 0.42, 0.45]) #SBM
+            #axin = ax.inset_axes([0.57, 0.165, 0.42, 0.45]) #primaryschool
             axin.set(xscale ="log",
                      yscale = "linear")
             axin.set_ylabel(r'$\rho$',labelpad=0) 
@@ -401,17 +402,17 @@ class SubTempNet(dict):
             axin.plot(x,PA0, linestyle, color = colo[4], label = r'$T$')
             axin.set_ylim(0, axin.set_ylim()[1])
             axin.set_xlim(5, axin.set_xlim()[1])
-            axin.set_xticks([10,100,1000,10000])
-            axin.set_yticks([0,0.2,0.4])
-            
+            axin.set_xticks([10,100,1000])
+            #axin.set_yticks([0,0.2,0.4]) #SBM
+            axin.set_yticks([0,0.5,1]) #primary
         
         if legend:
             #ax.legend(bbox_to_anchor=(0, -0.5, 1, 0), loc="lower left", mode="expand", ncol=5, title_fontsize = 17, title= None, handlelength = 0.8, handletextpad=0.2)
             #plt.legend(bbox_to_anchor=(1,1), loc="upper left", title_fontsize = 17, title= r'$I=$', handlelength = 0.8, handletextpad=0.2)
-            plt.legend(title_fontsize = 17, title= r'$I=$', handlelength = 0.8, handletextpad=0.2, loc= "lower left")
+            plt.legend(handlelength = 0.8, handletextpad=0.2, loc= "lower right")
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
-        ax.set_xticks([10,100,1000,10000])
+        ax.set_xticks([10,100,1000])
         ax.set_ylim(0, ax.set_ylim()[1])
         ax.set_xlim(1,ax.set_xlim()[1])
         fig.tight_layout()
