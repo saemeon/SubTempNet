@@ -1,6 +1,8 @@
 """needed Packages"""
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
 import networkx as nx
 import pathpy as pp
 import scipy
@@ -9,11 +11,12 @@ import pickle
 from IPython.display import clear_output
 plt.rcParams.update({'legend.fontsize': 'x-large',
          'figure.figsize': (6, 4),
-         'axes.labelsize': '22',
-         'axes.titlesize':'22',
-         'legend.fontsize': 20,
-         'xtick.labelsize':'22',
-         'ytick.labelsize':'22',
+         'axes.labelsize': '17',
+         'axes.titlesize':'17',
+         'legend.fontsize': 17,
+         'legend.fontsize': 17,
+         'xtick.labelsize':'17',
+         'ytick.labelsize':'17',
          'mathtext.fontset':'stix',
          'font.family':'STIXGeneral'
          })
@@ -32,7 +35,7 @@ class SubTempNet(dict):
             self["ecount"] = ecount
             self["ncount"] = ncount
             self["T"] = T
-            self["deg_seq"] = self.deg_seq(A)
+            self["deg_seq"] = self.deg_seq(A, directed = directed)
             
             #Statistics
             self["PA0"]={}
@@ -198,15 +201,15 @@ class SubTempNet(dict):
         return dic
     def get_static(self):
         return self.aggregate_Matrices(self["A"])
-    def plot_PA(self, normalize=False, sub = True, save = False, LCC = True, vline = False):
+    def plot_PA(self, normalize=True, sub = True, save = False, vline = False):
         fig, ax = plt.subplots()
         ax.set_xscale("log")
         ax.set_yscale("linear")
         ax.set_ylabel(r'$\rho$')  
-        ax.set_xlabel("T")
+        ax.set_xlabel(r'$T$')
         linestyle = "--*"
         colrange = [1,2,3,4,5]
-        colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
+        colo = plt.cm.get_cmap('viridis', len(colrange)).colors
         
         if normalize:
             s=self["ncount"]**2
@@ -222,7 +225,7 @@ class SubTempNet(dict):
             x = list([key for key,val in self["PAT2"].items()])
             PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
             x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-            plt.plot(x,PAT2, linestyle, color = colo[1], label = r'$I=3$')
+            plt.plot(x,PAT2, linestyle, color = colo[1], label = r'$I=2$')
 
             x = list([key for key,val in self["PAT4"].items()])
             PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
@@ -239,33 +242,28 @@ class SubTempNet(dict):
         x,PA0= zip(*sorted(zip(*(x,PA0))))
         plt.plot(x,PA0, linestyle, color = colo[4], label = r'$I=T$')
         
-        #LCC
-        if LCC:
-            if normalize: 
-                s=self["ncount"]
-            x = list([key for key,val in self["PAT"].items()])
-            PAT_LCC =  list([np.mean(LCC)/s for t,LCC in self["PAT_LCC"].items()])
-            x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
-            plt.plot(x,PAT_LCC, linestyle, label = "LCC")
         if vline:
             for (x,col,label) in vline:
                 ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.legend()
-        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
+        ax.set_xlim(1,ax.set_xlim()[1])
         fig.tight_layout()
         
         #save plot
         if save:
-                fig.savefig("")
+                fig.savefig("fig/"+save, dpi=600)
         return  ax
-    def plot_LCC(self, normalize=False, vline = False, save = False, ACC = True):
+    def plot_LCC(self, normalize=True, vline = False, log = False, save = False, ACC = True):
         fig, ax = plt.subplots()
+        color = "red"
         ax.set_xscale("log")
-        ax.set_yscale("linear")
-        ax.set_ylabel(r'$G$')  
-        ax.set_xlabel("T")
+        if log:
+            ax.set_yscale("log")
+        ax.set_ylabel(r'$G$', color = color)
+        ax.set_xlabel(r'$T$')
         linestyle = "--*"
         colrange = [1,2,3,4,5]
         colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
@@ -277,73 +275,150 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT_LCC =  list([(np.mean(LCC)**2)/s for t,LCC in self["PAT_LCC"].items()])
         x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
-        plt.plot(x,PAT_LCC, linestyle, label = r'$G^2$')
+        ax.plot(x,PAT_LCC, linestyle, color = color, label = r'$G^2$')
         
         if ACC:
+            color = "blue"
+            ax2= ax.twinx()
             if normalize:
                 s=self["ncount"]**2
             x = list([key for key,val in self["PAT"].items()])
             PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
-            plt.plot(x,PAT, linestyle, color = colo[0], label = r'$\rho$')
+            ax2.plot(x,PAT, linestyle, color = color)
+            ax2.set_ylabel(ylabel = r'$\rho$', color = color)
+            if log:
+                ax2.set_yscale("log")
+                ax2.set_ylim(1, 13000)#ax2.set_ylim()[1])
+            else:
+                ax2.set_ylim(0, ax2.set_ylim()[1])
+            ax2.tick_params(axis='y', labelcolor=color)
+            ax2.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in', labelcolor = color)
+            ax2.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in', labelcolor= color)
+            ax2.set_xticks([10,100,1000])
+        
+        #ax.legend()
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+        ax.tick_params(which = 'major', axis='y',labelcolor ="red")
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
+        ax.set_xticks([10,100,1000])
+        if log:
+            ax.set_ylim(1, 13000)#ax.set_ylim()[1])
+        else:
+            ax.set_ylim(0,ax.set_ylim()[1])
+        ax.set_xlim(1,ax.set_xlim()[1])
         if vline:
             for (x,col,label) in vline:
-                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
-        ax.legend()
-        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
-        ax.set_ylim(0, ax.set_ylim()[1])
+                ax.vlines(x = x, ymin=0, ymax = ax.set_ylim()[1], colors = col,   label = label)
         fig.tight_layout()
         
         #save plot
         if save:
-                fig.savefig("")
+                fig.savefig("fig/"+save, dpi=600)
         return  ax
-    def plot_cA0AT(self, sub = True, vline = False, save = False): 
+    def plot_cA0AT(self, sub = True, vline = False, rho = False, legend = False, save = False): 
         fig, ax = plt.subplots()
+        if vline:
+            for (x,col,label) in vline:
+                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.set_xscale("log")
         ax.set_yscale("linear")
         ax.set_ylabel(r'$c$')
-        ax.set_xlabel("T")
+        ax.set_xlabel(r'$T$')
         linestyle = "--*"
         colrange = [1,2,3,4,5]
-        colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
+        colo = plt.cm.get_cmap('viridis', len(colrange)).colors
         
         PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
 
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
-        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$I=1$')
+        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$1$')
         
         if sub:
             x = list([key for key,val in self["PAT2"].items()])
             PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
             x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-            ax.plot(x,PAT2, linestyle, color = colo[1], label = r'$I=2$')
+            ax.plot(x,PAT2, linestyle, color = colo[1], label = r'$2$')
 
             x = list([key for key,val in self["PAT4"].items()])
             PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
             x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-            ax.plot(x,PAT4,linestyle, color = colo[2], label = r'$I=4$')
+            ax.plot(x,PAT4,linestyle, color = colo[2], label = r'$4$')
 
             x = list([key for key,val in self["PAT8"].items()])
             PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
             x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-            ax.plot(x,PAT8,linestyle, color = colo[3], label = r'$I=8$')
-        if vline:
-            for (x,col,label) in vline:
-                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
-        ax.legend()
-        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
+            ax.plot(x,PAT8,linestyle, color = colo[3], label = r'$8$')
+            
+            x = list([key for key,val in self["PA0"].items()])
+            PA0 = list([PA0[t]/np.mean(self["PA0"][t]) for t in x])
+            x,PA0= zip(*sorted(zip(*(x,PA0))))
+            ax.plot(x,PA0,linestyle, color = colo[4], label = r'$T$')
+        if rho:
+            #axin = ax.inset_axes([0.13, 0.165, 0.42, 0.5]) #ER
+            axin = ax.inset_axes([0.57, 0.165, 0.42, 0.45]) #SBM
+            axin.set(xscale ="log",
+                     yscale = "linear")
+            axin.set_ylabel(r'$\rho$',labelpad=0) 
+            axin.set_xlabel(r'$T$',labelpad=-2)
+            axin.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+            axin.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
+            colrange = [1,2,3,4,5]
+            colo = plt.cm.get_cmap('viridis', len(colrange)).colors
+
+            if True:
+                s=self["ncount"]**2
+            else:
+                s=1
+
+            x = list([key for key,val in self["PAT"].items()])
+            PAT =  list([np.mean(y)/s for t,y in self["PAT"].items()])
+            x,PAT= zip(*sorted(zip(*(x,PAT))))
+            axin.plot(x,PAT, linestyle, color = colo[0], label = r'$1$')
+
+            if sub:
+                x = list([key for key,val in self["PAT2"].items()])
+                PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
+                x,PAT2= zip(*sorted(zip(*(x,PAT2))))
+                axin.plot(x,PAT2, linestyle, color = colo[1], label = r'$2$')
+
+                x = list([key for key,val in self["PAT4"].items()])
+                PAT4 = list([np.mean(y)/s for t,y in self["PAT4"].items()])
+                x,PAT4= zip(*sorted(zip(*(x,PAT4))))
+                axin.plot(x,PAT4, linestyle, color = colo[2], label = r'$4$')
+
+                x = list([key for key,val in self["PAT8"].items()])
+                PAT8 = list([np.mean(y)/s for t,y in self["PAT8"].items()])
+                x,PAT8= zip(*sorted(zip(*(x,PAT8))))
+                axin.plot(x,PAT8, linestyle, color = colo[3], label = r'$8$')  
+
+            x = list([key for key,val in self["PA0"].items()])
+            PA0 =  list([np.mean(y)/s for t,y in self["PA0"].items()])
+            x,PA0= zip(*sorted(zip(*(x,PA0))))
+            axin.plot(x,PA0, linestyle, color = colo[4], label = r'$T$')
+            axin.set_ylim(0, axin.set_ylim()[1])
+            axin.set_xlim(5, axin.set_xlim()[1])
+            axin.set_xticks([10,100,1000,10000])
+            axin.set_yticks([0,0.2,0.4])
+            
+        
+        if legend:
+            #ax.legend(bbox_to_anchor=(0, -0.5, 1, 0), loc="lower left", mode="expand", ncol=5, title_fontsize = 17, title= None, handlelength = 0.8, handletextpad=0.2)
+            #plt.legend(bbox_to_anchor=(1,1), loc="upper left", title_fontsize = 17, title= r'$I=$', handlelength = 0.8, handletextpad=0.2)
+            plt.legend(title_fontsize = 17, title= r'$I=$', handlelength = 0.8, handletextpad=0.2, loc= "lower left")
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
+        ax.set_xticks([10,100,1000,10000])
         ax.set_ylim(0, ax.set_ylim()[1])
+        ax.set_xlim(1,ax.set_xlim()[1])
         fig.tight_layout()
         
         #save plot
         if save:
-                fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
+                fig.savefig("fig/"+save, dpi=600)
         return
     def plot_min(self, save = False):  
         fig, ax = plt.subplots()
@@ -375,14 +450,14 @@ class SubTempNet(dict):
         M.append(min(PAT8))
         
         ax.plot(L,M,linestyle)
-        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
-        ax.set_ylim(0, ax.set_ylim()[1])
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
+        #ax.set_ylim(0, ax.set_ylim()[1])
         fig.tight_layout()
         
         #save plot
         if save:
-                fig.savefig("plots/" + self["objname"][:-11]+"_cA0AT")
+                fig.savefig("fig/"+save, dpi=600)
         return
     def plot_cA0AL(self, *T, save = False):  
         fig, ax = plt.subplots()
@@ -404,14 +479,15 @@ class SubTempNet(dict):
                     linestyle, label = "T= "+str(t))
         
         ax.legend()
-        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=20, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=20, direction='in')
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=16, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=16, direction='in')
         ax.set_ylim(0, ax.set_ylim()[1])
+        #ax.set_xlim(1,10**3.8)
         fig.tight_layout()
         
         #save plot
         if save:
-                fig.savefig("plots/" + self["objname"][:-11]+"_cA0AL")
+                fig.savefig("fig/"+save, dpi=600)
         return
     @staticmethod
     def init_plt(cf):
@@ -538,9 +614,12 @@ class SubTempNet(dict):
         h = np.log(1-(np.log(n)/n))/np.log(1-p)
         return h
     @staticmethod
-    def deg_seq(A):
+    def deg_seq(A, directed = False):
         W=SubTempNet.aggregate_Matrices(A, weighted = True)
-        AW = nx.from_scipy_sparse_matrix(W,parallel_edges=True,create_using=nx.MultiDiGraph)
+        if directed:
+            AW = nx.from_scipy_sparse_matrix(W,parallel_edges=True,create_using=nx.MultiDiGraph)
+        else:
+            AW = nx.from_scipy_sparse_matrix(W,parallel_edges=True,create_using=nx.MultiGraph)
         selfloops = nx.selfloop_edges(AW.copy())
         AW.remove_edges_from(selfloops)
         deg = np.array(sorted([d for n, d in AW.degree()], reverse=True))
@@ -556,7 +635,7 @@ class SubTempNet(dict):
                     f.write(str(v) + separator + str(w) + separator + str(t)+'\n')
     @staticmethod
     def ChungLu(deg):
-        G = nx.expected_degree_graph(deg)
+        G = nx.expected_degree_graph(deg, selfloops = False)
         G = nx.Graph(G)
         G.remove_edges_from(nx.selfloop_edges(G))
         return G
