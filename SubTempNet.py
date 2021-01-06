@@ -258,15 +258,15 @@ class SubTempNet(dict):
         return  ax
     def plot_LCC(self, normalize=True, vline = False, log = False, save = False, ACC = True):
         fig, ax = plt.subplots()
+        colrange = [1,2,3,4,5]
+        colo = plt.cm.get_cmap('viridis', len(colrange)).colors
         color = "red"
         ax.set_xscale("log")
         if log:
             ax.set_yscale("log")
-        ax.set_ylabel(r'$G$', color = color)
+        ax.set_ylabel(r'$G^2$', color = color)
         ax.set_xlabel(r'$T$')
         linestyle = "--*"
-        colrange = [1,2,3,4,5]
-        colo = plt.cm.get_cmap('viridis', len(colrange)+1).colors
         
         if normalize:
             s=self["ncount"]**2
@@ -278,7 +278,7 @@ class SubTempNet(dict):
         ax.plot(x,PAT_LCC, linestyle, color = color, label = r'$G^2$')
         
         if ACC:
-            color = "blue"
+            color = colo[0]
             ax2= ax.twinx()
             if normalize:
                 s=self["ncount"]**2
@@ -358,9 +358,10 @@ class SubTempNet(dict):
             x,PA0= zip(*sorted(zip(*(x,PA0))))
             ax.plot(x,PA0,linestyle, color = colo[4], label = r'$I=T$')
         if rho:
-            #axin = ax.inset_axes([0.13, 0.16, 0.39, 0.45]) #ER
-            axin = ax.inset_axes([0.57, 0.165, 0.42, 0.45]) #SBM
-            #axin = ax.inset_axes([0.57, 0.165, 0.42, 0.45]) #primaryschool
+            try:
+                axin = ax.inset_axes(rho) 
+            except:
+                axin = ax.inset_axes([0.13, 0.16, 0.39, 0.45]) 
             axin.set(xscale ="log",
                      yscale = "linear")
             axin.set_ylabel(r'$\rho$',labelpad=0) 
@@ -379,7 +380,7 @@ class SubTempNet(dict):
             PAT =  list([np.mean(y)/s for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
             axin.plot(x,PAT, linestyle, color = colo[0], label = r'$1$')
-
+            
             if sub:
                 x = list([key for key,val in self["PAT2"].items()])
                 PAT2 = list([np.mean(y)/s for t,y in self["PAT2"].items()])
@@ -403,18 +404,24 @@ class SubTempNet(dict):
             axin.set_ylim(0, axin.set_ylim()[1])
             axin.set_xlim(5, axin.set_xlim()[1])
             #axin.set_xticks([10,100,1000])
-            axin.set_yticks([0,0.2,0.4]) #SBM
-            #axin.set_yticks([0,0.5,1]) #primary
-        
+            #axin.set_yticks([0,0.2,0.4]) #SBM
+            axin.set_yticks([0,0.5,1])
+            if vline:
+                for (x,col,label) in vline:
+                    axin.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
+            
         if legend:
             #ax.legend(bbox_to_anchor=(0, -0.5, 1, 0), loc="lower left", mode="expand", ncol=5, title_fontsize = 17, title= None, handlelength = 0.8, handletextpad=0.2)
             #plt.legend(bbox_to_anchor=(1,1), loc="upper left", title_fontsize = 17, title= r'$I=$', handlelength = 0.8, handletextpad=0.2)
-            plt.legend(handlelength = 0.8, handletextpad=0.2, loc= "lower left")
+            try:
+                plt.legend(handlelength = 0.8, handletextpad=0.2, loc= legend)
+            except:
+                plt.legend(handlelength = 0.8, handletextpad=0.2)
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
-        ax.set_xticks([10,100,1000])
+        #ax.set_xticks([10,100,1000])
         ax.set_ylim(0, ax.set_ylim()[1])
-        ax.set_xlim(1,ax.set_xlim()[1])
+        ax.set_xlim(1, ax.set_xlim()[1])
         fig.tight_layout()
         
         #save plot
