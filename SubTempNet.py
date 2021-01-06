@@ -264,7 +264,7 @@ class SubTempNet(dict):
         ax.set_xscale("log")
         if log:
             ax.set_yscale("log")
-        ax.set_ylabel(r'$G^2$', color = color)
+        ax.set_ylabel(r'$G^2$')
         ax.set_xlabel(r'$T$')
         linestyle = "--*"
         
@@ -275,7 +275,7 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT_LCC =  list([(np.mean(LCC)**2)/s for t,LCC in self["PAT_LCC"].items()])
         x,PAT_LCC= zip(*sorted(zip(*(x,PAT_LCC))))
-        ax.plot(x,PAT_LCC, linestyle, color = color, label = r'$G^2$')
+        ax.plot(x,PAT_LCC, "^", color = color, label = r'$G^2$')
         
         if ACC:
             color = colo[0]
@@ -286,21 +286,20 @@ class SubTempNet(dict):
             PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
-            ax2.plot(x,PAT, linestyle, color = color)
-            ax2.set_ylabel(ylabel = r'$\rho$', color = color)
+            ax2.plot(x,PAT, linestyle, color = color,label = r'$\rho$')
+            ax2.set_ylabel(ylabel = r'$\rho$')
             if log:
                 ax2.set_yscale("log")
                 ax2.set_ylim(1, 13000)#ax2.set_ylim()[1])
             else:
                 ax2.set_ylim(0, ax2.set_ylim()[1])
-            ax2.tick_params(axis='y', labelcolor=color)
-            ax2.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in', labelcolor = color)
-            ax2.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in', labelcolor= color)
+            ax2.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+            ax2.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
             ax2.set_xticks([10,100,1000])
+            ax.plot([], [], linestyle, label = r'$\rho$', color = color)
+        ax.legend()
         
-        #ax.legend()
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
-        ax.tick_params(which = 'major', axis='y',labelcolor ="red")
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         ax.set_xticks([10,100,1000])
         if log:
