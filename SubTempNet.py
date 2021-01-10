@@ -419,6 +419,7 @@ class SubTempNet(dict):
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         #ax.set_xticks([10,100,1000])
+        ax.set_xticks([i for i in ax.get_xticks(minor = False) if i > 1 and i < ax.set_xlim()[1]])
         ax.set_ylim(0, ax.set_ylim()[1])
         ax.set_xlim(1, ax.set_xlim()[1])
         fig.tight_layout()
@@ -460,36 +461,6 @@ class SubTempNet(dict):
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         #ax.set_ylim(0, ax.set_ylim()[1])
-        fig.tight_layout()
-        
-        #save plot
-        if save:
-                fig.savefig("fig/"+save, dpi=600)
-        return
-    def plot_cA0AL(self, *T, save = False):  
-        fig, ax = plt.subplots()
-        ax.set_xscale("log")
-        ax.set_yscale("linear")
-        ax.set_ylabel(r'$c_{\mathcal{A},\mathcal{A}_L}$')
-        ax.set_xlabel("L")
-        linestyle = "--*"
-
-        x = sorted(list([key for key,val in self["PAT8"].items()]))
-        
-        for t in T:
-            t= x[t]
-            ax.plot([t,t/2,t/4,t/8, 1],[np.mean(self["PA0"][t])/np.mean(self["PAT"][t]),
-                                                    np.mean(self["PA0"][t])/np.mean(self["PAT2"][t]),
-                                                    np.mean(self["PA0"][t])/np.mean(self["PAT4"][t]),
-                                                    np.mean(self["PA0"][t])/np.mean(self["PAT8"][t]),
-                                                    1],
-                    linestyle, label = "T= "+str(t))
-        
-        ax.legend()
-        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=16, direction='in')
-        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=16, direction='in')
-        ax.set_ylim(0, ax.set_ylim()[1])
-        #ax.set_xlim(1,10**3.8)
         fig.tight_layout()
         
         #save plot
