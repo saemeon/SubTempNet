@@ -123,6 +123,54 @@ class SubTempNet(dict):
             done.append(t)
             if np.mean(self["PA0"][t]) == self["ncount"]**2:
                 reached_max = t
+    def run1(self, I, T, maxsamp = 50, minsamp = 5):
+        done =[]
+        reached_max = self["T"]+1 
+        for i in I:
+            try:
+                test = self["PAT"+str(i)]
+            except:
+                self["PAT"+str(i)]={}
+        for t in T:
+            if t ==1:
+                for i in I:
+                    self["PAT"+str(i)][t]=[self["ncount"]]
+                done.append(t)
+                continue
+            if reached_max < t:
+                for i in I:
+                    self["PAT"+str(i)][t]=[self["ncount"]**2]
+                continue
+
+            for k in I:
+                    if k <= t: #temporal network is longer than aggregation window
+                        self["PAT"+str(k)][t]=[]
+            samplenum = 0
+            samples = self.sample_TN(t, maxsamp = maxsamp, minsamp = minsamp)
+            for samplestart, sampleend in samples:
+                samplenum +=1       
+                #PATk calculates accessibility of subaggregated network sample
+                for k in I:
+                    if t < k: #temporal network is shorter than aggregation window
+                        continue
+                    slicelengh = t//k ##????
+                    slices= self.slice_TN(slicelengh, samplestart, sampleend)
+                    AL = []
+                    for slicestart, sliceend in slices:
+                        AL.append(self.accessibility(self.aggregate_Matrices(self["A"][slicestart:sliceend]), cutoff = slicelengh))
+                        if len(AL)>1:
+                            AL=[self.unfold_accessibility(AL)]
+                            
+                    PATk = self.unfold_accessibility(AL)
+                    self["PAT"+str(k)][t].append(PATk.nnz) 
+                    
+                    #print status update
+                    clear_output()
+                    print("Done with samplelengths ",done)
+                    print("Analyzing sample number",samplenum, "for samplelength ", t, "and ",k, "slices") 
+            done.append(t)
+            if np.mean(self["PA0"][t]) == self["ncount"]**2:
+                reached_max = t
     def sample_TN(self, samplelength, maxsamp = -1, minsamp = 5):
         def intervals(steps =1):
             intlen = samplelength
@@ -316,7 +364,7 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("fig/"+save, dpi=600)
         return  ax
-    def plot_cA0AT(self, sub = True, vline = False, rho = False, legend = False, save = False): 
+    def plot_cA0AT(self,I = False, sub = True, vline = False, rho = False, legend = False, save = False): 
         fig, ax = plt.subplots()
         if vline:
             for (x,col,label) in vline:
@@ -351,11 +399,18 @@ class SubTempNet(dict):
             PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
             x,PAT8= zip(*sorted(zip(*(x,PAT8))))
             ax.plot(x,PAT8,linestyle, color = colo[3], label = r'$I=8$')
-            
+            if I:
+                for i in I:
+                    #print(self["PAT"+str(i)])
+                    x = list([key for key,val in self["PAT"+str(i)].items()])
+                    print(x)
+                    c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
+                    x,c= zip(*sorted(zip(*(x,c))))
+                    ax.plot(x,c,linestyle, color = "black", label = r'$I=$'+str(i))
             x = list([key for key,val in self["PA0"].items()])
             PA0 = list([PA0[t]/np.mean(self["PA0"][t]) for t in x])
             x,PA0= zip(*sorted(zip(*(x,PA0))))
-            ax.plot(x,PA0,linestyle, color = colo[4], label = r'$I=T$')
+            #ax.plot(x,PA0,linestyle, color = colo[4], label = r'$I=T$')
         if rho:
             try:
                 axin = ax.inset_axes(rho) 
@@ -364,7 +419,7 @@ class SubTempNet(dict):
             axin.set(xscale ="log",
                      yscale = "linear")
             axin.set_ylabel(r'$\rho$',labelpad=0) 
-            axin.set_xlabel(r'$T$',labelpad=-2)
+            #axin.set_xlabel(r'$T$',labelpad=-2)
             axin.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
             axin.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
             colrange = [1,2,3,4,5]
@@ -404,7 +459,7 @@ class SubTempNet(dict):
             axin.set_xlim(5, axin.set_xlim()[1])
             #axin.set_xticks([10,100,1000])
             #axin.set_yticks([0,0.2,0.4]) #SBM
-            axin.set_yticks([0,0.5,1])
+            axin.set_yticks([0.0,1.0])
             if vline:
                 for (x,col,label) in vline:
                     axin.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
@@ -428,41 +483,86 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("fig/"+save, dpi=600)
         return
-    def plot_min(self, save = False):  
+    def plot_min(self, I, T= False,  save = False, log = False, normalize = False, label = None):  
         fig, ax = plt.subplots()
         ax.set_ylabel(r'$min(c)$')
         ax.set_xlabel(r'$I$')
-        linestyle = "--*"
+        if log:
+            ax.set_xscale("log")
+        ax.set_yscale("linear")
+        linestyle = "*"
         M = []
-        L = [1,2,4,8]
         PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
-
+        
+        for i in I :
+            x = list([key for key,val in self["PAT"+str(i)].items()])
+            PA = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
+            x,PA= zip(*sorted(zip(*(x,PA))))
+            M.append(min(PA))
+            
+        #add I=1 and I=T
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
+        I.append(1)
         M.append(min(PAT))
-
-        x = list([key for key,val in self["PAT2"].items()])
-        PAT2 = list([PA0[t]/np.mean(self["PAT2"][t]) for t in x])
-        x,PAT2= zip(*sorted(zip(*(x,PAT2))))
-        M.append(min(PAT2))
-        
-        x = list([key for key,val in self["PAT4"].items()])
-        PAT4 = list([PA0[t]/np.mean(self["PAT4"][t]) for t in x])
-        x,PAT4= zip(*sorted(zip(*(x,PAT4))))
-        M.append(min(PAT4))
-        
-        x = list([key for key,val in self["PAT8"].items()])
-        PAT8 = list([PA0[t]/np.mean(self["PAT8"][t]) for t in x])
-        x,PAT8= zip(*sorted(zip(*(x,PAT8))))
-        M.append(min(PAT8))
-        
-        ax.plot(L,M,linestyle)
+        if T:
+            I.append(self["T"])
+            M.append(1)
+        I,M= zip(*sorted(zip(*(I,M))))
+        if normalize:
+            m = min(M)
+            M = [(i-m)/(1-m) for i in M]
+            ax.set_ylabel(r'$normalized min(c)$')
+        ax.plot(I,M,linestyle, label = label)
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
-        #ax.set_ylim(0, ax.set_ylim()[1])
+        ax.set_ylim(0, ax.set_ylim()[1])
+        if label:
+            ax.legend(loc="lower right", handlelength = 0.8, handletextpad=0.2)
         fig.tight_layout()
+        print(I,M)
+        #save plot
+        if save:
+                fig.savefig("fig/"+save, dpi=600)
+        return
+    def plot_mean(self, I, T= False,  save = False, log = False, normalize = False):  
+        fig, ax = plt.subplots()
+        ax.set_ylabel(r'$mean(c)$')
+        ax.set_xlabel(r'$I$')
+        if log:
+            ax.set_xscale("log")
+        ax.set_yscale("linear")
+        linestyle = "*"
+        M = []
+        PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
         
+        for i in I :
+            x = list([key for key,val in self["PAT"+str(i)].items()])
+            c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
+            x,c= zip(*sorted(zip(*(x,c))))
+            M.append(np.mean(c))
+            
+        #add I=1 and I=T
+        x = list([key for key,val in self["PAT"].items()])
+        PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
+        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        I.append(1)
+        M.append(np.mean(PAT))
+        if T:
+            I.append(self["T"])
+            M.append(1)
+        I,M= zip(*sorted(zip(*(I,M))))
+        if normalize:
+            m = min(M)
+            M = [(i-m)/(1-m) for i in M]
+            ax.set_ylabel(r'$normalized min(c)$')
+        ax.plot(I,M,linestyle)
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
+        ax.set_ylim(0, ax.set_ylim()[1])
+        fig.tight_layout()
+        print(I,M)
         #save plot
         if save:
                 fig.savefig("fig/"+save, dpi=600)
