@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 import networkx as nx
-import pathpy as pp
 import scipy
-import scipy.optimize as opt
 import pickle
 from IPython.display import clear_output
 plt.rcParams.update({'legend.fontsize': 'x-large',
@@ -394,7 +392,7 @@ class SubTempNet(dict):
         fig.tight_layout()
         
         #save plot
-        if save:
+        if False:
                 fig.savefig("fig/"+save, dpi=600)
         return  ax
     def plot_LCC(self, normalize=True, vline = False, log = False, save = False, ACC = True):
@@ -454,7 +452,7 @@ class SubTempNet(dict):
         fig.tight_layout()
         
         #save plot
-        if save:
+        if False:
                 fig.savefig("fig/"+save, dpi=600)
         return  ax
     def plot_cA0AT(self,I = False, sub = True, vline = False, rho = False, legend = False, save = False): 
@@ -572,7 +570,7 @@ class SubTempNet(dict):
         fig.tight_layout()
         
         #save plot
-        if save:
+        if False:
                 fig.savefig("fig/"+save, dpi=600)
         return
     def plot_c(self, I = False,  inset = False, legend = False, vline = False, save = False): 
@@ -657,7 +655,7 @@ class SubTempNet(dict):
         fig.tight_layout()
         
         #save plot
-        if save:
+        if False:
                 fig.savefig("fig/"+save, dpi=600)
         return
     def plot_min(self, I = False, T= False,  save = False, log = False, normalize = False, label = None):  
@@ -675,13 +673,11 @@ class SubTempNet(dict):
         for i in Ilist:
             x = list([key for key,val in self["PAT"+str(i)].items()])
             PA = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
-            x,PA= zip(*sorted(zip(*(x,PA))))
             M.append(min(PA))
             
         #add I=1 and I=T
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
-        x,PAT= zip(*sorted(zip(*(x,PAT))))
         Ilist.append(1)
         M.append(min(PAT))
         if T:
@@ -703,6 +699,40 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("fig/"+save, dpi=600)
         return
+    def get_min(self, I = False, T= False, normalize = False):  
+        Ilist = I.copy()
+        M = []
+        PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
+        for i in Ilist:
+            x = list([key for key,val in self["PAT"+str(i)].items()])
+            c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
+            M.append(min(c))
+        #add I=1 and I=T
+        x = list([key for key,val in self["PAT"].items()])
+        c =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
+        Ilist.append(1)
+        M.append(min(c))
+        Ilist.append(self["T"])
+        M.append(1)
+        Ilist,M= zip(*sorted(zip(*(Ilist,M))))
+        return Ilist, M
+    def get_mean(self, I = False, T= False, normalize = False):  
+        Ilist = I.copy()
+        M = []
+        PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
+        for i in Ilist:
+            x = list([key for key,val in self["PAT"+str(i)].items()])
+            c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
+            M.append(np.mean(c))
+        #add I=1 and I=T
+        x = list([key for key,val in self["PAT"].items()])
+        c =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
+        Ilist.append(1)
+        M.append(np.mean(c))
+        Ilist.append(self["T"])
+        M.append(1)
+        Ilist,M= zip(*sorted(zip(*(Ilist,M))))
+        return Ilist, M
     def plot_mean(self, I, T= False,  save = False, log = False, normalize = False):  
         fig, ax = plt.subplots()
         ax.set_ylabel(r'$mean(c)$')
@@ -718,15 +748,13 @@ class SubTempNet(dict):
         for i in Ilist :
             x = list([key for key,val in self["PAT"+str(i)].items()])
             c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
-            x,c= zip(*sorted(zip(*(x,c))))
             M.append(np.mean(c))
             
         #add I=1 and I=T
         x = list([key for key,val in self["PAT"].items()])
-        PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
-        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        c =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         Ilist.append(1)
-        M.append(np.mean(PAT))
+        M.append(np.mean(c))
         if T:
             Ilist.append(self["T"])
             M.append(1)
