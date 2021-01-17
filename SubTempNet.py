@@ -9,12 +9,12 @@ import pickle
 from IPython.display import clear_output
 plt.rcParams.update({'legend.fontsize': 'x-large',
          'figure.figsize': (6, 4),
-         'axes.labelsize': '17',
-         'axes.titlesize':'17',
-         'legend.fontsize': 17,
-         'legend.fontsize': 17,
-         'xtick.labelsize':'17',
-         'ytick.labelsize':'17',
+         'axes.labelsize': '20',
+         'axes.titlesize':'20',
+         'legend.fontsize': 18,
+         'legend.fontsize': 18,
+         'xtick.labelsize':'20',
+         'ytick.labelsize':'20',
          'mathtext.fontset':'stix',
          'font.family':'STIXGeneral'
          })
@@ -399,13 +399,13 @@ class SubTempNet(dict):
         fig, ax = plt.subplots()
         colrange = [1,2,3,4,5]
         colo = plt.cm.get_cmap('viridis', len(colrange)).colors
-        color = "red"
+        color = "green"
         ax.set_xscale("log")
         if log:
             ax.set_yscale("log")
         ax.set_ylabel(r'$G^2$')
         ax.set_xlabel(r'$T$')
-        linestyle = "--*"
+        linestyle = "*"
         
         if normalize:
             s=self["ncount"]**2
@@ -429,7 +429,7 @@ class SubTempNet(dict):
             ax2.set_ylabel(ylabel = r'$\rho$')
             if log:
                 ax2.set_yscale("log")
-                ax2.set_ylim(1, 13000)#ax2.set_ylim()[1])
+                ax2.set_ylim(ax.set_ylim())
             else:
                 ax2.set_ylim(0, ax2.set_ylim()[1])
             ax2.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
@@ -441,10 +441,7 @@ class SubTempNet(dict):
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         ax.set_xticks([10,100,1000])
-        if log:
-            ax.set_ylim(1, 13000)#ax.set_ylim()[1])
-        else:
-            ax.set_ylim(0,ax.set_ylim()[1])
+        #ax.set_ylim(0,ax.set_ylim()[1])
         ax.set_xlim(1,ax.set_xlim()[1])
         if vline:
             for (x,col,label) in vline:
@@ -573,16 +570,15 @@ class SubTempNet(dict):
         if False:
                 fig.savefig("fig/"+save, dpi=600)
         return
-    def plot_c(self, I = False,  inset = False, legend = False, vline = False, save = False): 
+    def plot_c(self, I = False,  inset = False, legend = False, vline = False, save = False, linestyle = "--*", bbox = None): 
         fig, ax = plt.subplots()
         if vline:
             for (x,col,label) in vline:
                 ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.set_xscale("log")
         ax.set_yscale("linear")
-        ax.set_ylabel(r'$c$')
+        ax.set_ylabel(r'$c(I,T)$')
         ax.set_xlabel(r'$T$')
-        linestyle = "--*"
         colrange = [1,2,3,4,5]
         colo = plt.cm.get_cmap('viridis', len(colrange)).colors
         
@@ -592,7 +588,7 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
-        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$I=1$')
+        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$1$')
         
         if I:
             colo = plt.cm.get_cmap('viridis', len(I)+2).colors
@@ -601,7 +597,7 @@ class SubTempNet(dict):
                 x = list([key for key,val in self["PAT"+str(i)].items()])
                 c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
                 x,c= zip(*sorted(zip(*(x,c))))
-                ax.plot(x,c,linestyle, color = colo[j+1], label = r'$I=$'+str(i))
+                ax.plot(x,c,linestyle, color = colo[j+1], label = str(i))
         if inset:
             try:
                 axin = ax.inset_axes(inset) 
@@ -610,7 +606,7 @@ class SubTempNet(dict):
             axin.set(xscale ="log",
                      yscale = "linear")
             axin.set_ylabel(r'$\rho$',labelpad=0) 
-            axin.set_xlabel(r'$T$',labelpad=-2)
+            #axin.set_xlabel(r'$T$',labelpad=-2)
             axin.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
             axin.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
 
@@ -631,20 +627,19 @@ class SubTempNet(dict):
             PA0 =  list([np.mean(y)/(self["ncount"]**2) for t,y in self["PA0"].items()])
             x,PA0= zip(*sorted(zip(*(x,PA0))))
             axin.plot(x,PA0, linestyle, color = colo[-1])
-            ax.plot([],[], linestyle, color = colo[-1], label = r'$I=T$')
+            ax.plot([],[], linestyle, color = colo[-1], label = r'$T$')
             
-            axin.set_ylim(0, axin.set_ylim()[1])
-            axin.set_xlim(5, axin.set_xlim()[1])
+            
             #axin.set_xticks([10,100,1000])
-            #axin.set_yticks([0,0.2,0.4]) #SBM
-            axin.set_yticks([0.0,1.0])
+            #axin.set_yticks([0,0.5]) #SBM
+            #axin.set_yticks([0.0,1.0])
             if vline:
                 for (x,col,label) in vline:
-                    axin.vlines(x = x, ymin=0, ymax = 1, colors = col)
+                    axin.vlines(x = x, ymin=0, ymax =axin.set_ylim()[1] , colors = col)
             
         if legend:
             try:
-                plt.legend(handlelength = 0.8, handletextpad=0.2, loc= legend)
+                plt.legend(title = r'$I=$', title_fontsize = 18, handlelength = 0.8, handletextpad=0.2, loc= legend, bbox_to_anchor= bbox)
             except:
                 plt.legend(handlelength = 0.8, handletextpad=0.2)
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
@@ -652,10 +647,15 @@ class SubTempNet(dict):
         ax.set_xticks([i for i in ax.get_xticks(minor = False) if i > 1 and i < ax.set_xlim()[1]])
         ax.set_ylim(0, ax.set_ylim()[1])
         ax.set_xlim(1, ax.set_xlim()[1])
+        if inset:
+            axin.set_xticks(ax.get_xticks(minor = False))
+            #axin.set_ylim(ax.set_ylim())
+            axin.set_xlim(ax.set_xlim())
+            #axin.set_yticks(ax.get_yticks(minor = False))
         fig.tight_layout()
         
         #save plot
-        if False:
+        if save:
                 fig.savefig("fig/"+save, dpi=600)
         return
     def plot_min(self, I = False, T= False,  save = False, log = False, normalize = False, label = None):  
@@ -712,8 +712,9 @@ class SubTempNet(dict):
         c =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         Ilist.append(1)
         M.append(min(c))
-        Ilist.append(self["T"])
-        M.append(1)
+        if T:
+            Ilist.append(self["T"])
+            M.append(1)
         Ilist,M= zip(*sorted(zip(*(Ilist,M))))
         return Ilist, M
     def get_mean(self, I = False, T= False, normalize = False):  
@@ -729,8 +730,9 @@ class SubTempNet(dict):
         c =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
         Ilist.append(1)
         M.append(np.mean(c))
-        Ilist.append(self["T"])
-        M.append(1)
+        if T:
+            Ilist.append(self["T"])
+            M.append(1)
         Ilist,M= zip(*sorted(zip(*(Ilist,M))))
         return Ilist, M
     def plot_mean(self, I, T= False,  save = False, log = False, normalize = False):  
