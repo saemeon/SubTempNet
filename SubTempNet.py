@@ -694,6 +694,7 @@ class SubTempNet(dict):
                 x = list([key for key,val in self["PAT"+str(i)].items()])
                 c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
                 x,c= zip(*sorted(zip(*(x,c))))
+                #c=[min(1,i) for i in c]
                 ax.plot(x,c,linestyle, color = colo[j+1], label = r'$I=$'+str(i))
         
         
