@@ -397,7 +397,7 @@ class SubTempNet(dict):
         if False:
                 fig.savefig("fig/"+save, dpi=600)
         return  ax
-    def plot_LCC(self, normalize=True, vline = False, log = False, save = False, ACC = True):
+    def plot_LCC(self, normalize=True, grid = True, vline = False, log = False, save = False, ACC = True):
         fig, ax = plt.subplots(figsize=(6,3))
         colrange = [1,2,3,4,5]
         colo = plt.cm.get_cmap('viridis', len(colrange)).colors
@@ -430,8 +430,8 @@ class SubTempNet(dict):
             PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
-            ax2.plot(x[1:],PAT[1:], linestyle, color = color,label = r'$\rho$')
-            ax2.set_ylabel(ylabel = r'$\rho$')
+            ax2.plot(x[1:],PAT[1:], linestyle, color = color,label = r'$\rho^1_T$')
+            ax2.set_ylabel(ylabel = r'$\rho^1_T$')
             if log:
                 ax2.set_yscale("log")
                 ax2.set_ylim(ax.set_ylim())
@@ -441,7 +441,7 @@ class SubTempNet(dict):
             ax2.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
             #ax2.set_xticks([10,100,1000])
             ax2.set_yticks([10**(-3),10**(-2),10**(-1),10**(0)])
-            ax.plot([], [], linestyle, label = r'$\rho$', color = color)
+            ax.plot([], [], linestyle, label = r'$\rho^1_T$', color = color)
         ax.legend()
         
         ax.tick_params(which = 'major', axis='both', width=1.1, length = 10, labelsize=17, direction='in')
@@ -664,7 +664,7 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("fig/"+save, dpi=600)
         return
-    def plot_cs(self, I = False, legend = False, vline = False, save = False, linestyle = "--*", bbox = None): 
+    def plot_cs(self, I = False, legend = False, grid = True, vline = False, save = False, linestyle = "--*", bbox = None): 
         fig = plt.figure()
         gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 3]) 
         ax = fig.add_subplot(gs[1])
@@ -672,9 +672,10 @@ class SubTempNet(dict):
             for (x,col,label) in vline:
                 ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
         ax.set_xscale("log")
-        ax.set_ylabel(r'$\mathtt{C}_I^T$')
+        ax.set_ylabel(r'$\mathtt{C}^I_T$')
         ax.set_xlabel(r'$T$')
-        ax.grid()
+        if grid:
+            ax.grid()
         ax.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0])
         ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
@@ -700,8 +701,9 @@ class SubTempNet(dict):
         
         axin = fig.add_subplot(gs[0], sharex = ax)
         axin.set_xscale("log")
-        axin.set_ylabel(r'$\rho$') 
-        axin.grid()
+        axin.set_ylabel(r'$\rho_T^I$') 
+        if grid:
+            axin.grid()
         axin.set_yticks([0.2,0.4,0.6,0.8,1.0])
         #axin.set_yticks([0.1,0.2,0.3,0.4,0.5])#SBM
         axin.tick_params(which = 'major', axis='both', width=1.1, length = 10, labelsize=17, direction='in')
