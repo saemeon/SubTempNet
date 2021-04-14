@@ -18,7 +18,8 @@ plt.rcParams.update({'legend.fontsize': 'x-large',
          'xtick.labelsize':'20',
          'ytick.labelsize':'20',
          'mathtext.fontset':'stix',
-         'font.family':'STIXGeneral'
+         'font.family':'STIXGeneral',
+         'lines.markersize': '7'
          })
 class SubTempNet(dict):
     def __init__(self, filename, objname, directed = False, init = True):
@@ -397,11 +398,11 @@ class SubTempNet(dict):
         if False:
                 fig.savefig("fig/"+save, dpi=600)
         return  ax
-    def plot_LCC(self, normalize=True, grid = True, vline = False, log = False, save = False, ACC = True):
+    def plot_LCC(self, normalize=True, grid = True, vline = False, legend = None, log = False, save = False, ACC = True):
         fig, ax = plt.subplots(figsize=(6,3))
         colrange = [1,2,3,4,5]
         colo = plt.cm.get_cmap('viridis', len(colrange)).colors
-        color = "green"
+        color = "limegreen"
         ax.set_xscale("log")
         if log:
             ax.set_yscale("log")
@@ -409,7 +410,8 @@ class SubTempNet(dict):
         ax.set_xlabel(r'$T$')
         ax.set_yticks([10**(-3),10**(-2),10**(-1),10**(0)])
         ax.set_xticks([10**(3),10**(2),10**(1),10**(0)])
-        ax.grid()
+        if grid:
+            ax.grid()
         linestyle = "*"
         
         if normalize:
@@ -430,7 +432,7 @@ class SubTempNet(dict):
             PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             #PAT =  list([((np.mean(y))/s)**1 for t,y in self["PAT"].items()])
             x,PAT= zip(*sorted(zip(*(x,PAT))))
-            ax2.plot(x[1:],PAT[1:], linestyle, color = color,label = r'$\rho^1_T$')
+            ax2.plot(x[1:],PAT[1:], linestyle,ms=10, color = color,label = r'$\rho^1_T$')
             ax2.set_ylabel(ylabel = r'$\rho^1_T$')
             if log:
                 ax2.set_yscale("log")
@@ -441,8 +443,8 @@ class SubTempNet(dict):
             ax2.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
             #ax2.set_xticks([10,100,1000])
             ax2.set_yticks([10**(-3),10**(-2),10**(-1),10**(0)])
-            ax.plot([], [], linestyle, label = r'$\rho^1_T$', color = color)
-        ax.legend()
+            ax.plot([], [], linestyle,ms=10, label = r'$\rho^1_T$', color = color)
+        ax.legend(handlelength = 0.8, handletextpad=0.2, loc= legend)
         
         ax.tick_params(which = 'major', axis='both', width=1.1, length = 10, labelsize=17, direction='in')
         ax.tick_params(which = 'minor', axis='both', width=1.1, length = 5, labelsize=17, direction='in')
@@ -664,7 +666,7 @@ class SubTempNet(dict):
         if save:
                 fig.savefig("fig/"+save, dpi=600)
         return
-    def plot_cs(self, I = False, legend = False, grid = True, vline = False, save = False, linestyle = "--*", bbox = None): 
+    def plot_cs(self, I = False, legend = False,title = False, grid = False, vline = False, save = False, linestyle = "--*", bbox = None): 
         fig = plt.figure()
         gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 3]) 
         ax = fig.add_subplot(gs[1])
@@ -674,6 +676,7 @@ class SubTempNet(dict):
         ax.set_xscale("log")
         ax.set_ylabel(r'$\mathtt{C}^I_T$')
         ax.set_xlabel(r'$T$')
+        
         if grid:
             ax.grid()
         ax.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0])
@@ -681,22 +684,28 @@ class SubTempNet(dict):
         ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
         colrange = [1,2,3,4]
         colo = plt.cm.get_cmap('viridis', len(colrange)).colors
+        lines = ["--*","--o","--D","--v"]
+        mss= [10,7,7,7]
+        #lines = ["*","x","+","."]
         
         PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
-        #I=1
-        x = list([key for key,val in self["PAT"].items()])
-        PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
-        x,PAT= zip(*sorted(zip(*(x,PAT))))
-        ax.plot(x,PAT,linestyle, color = colo[0], label = r'$I=1$')
+        ax.plot([],[], lines[-1], color = colo[-1], label = r'$I=T$')
+
         if I:
             colo = plt.cm.get_cmap('viridis', len(I)+2).colors
-            for j in range(len(I)):
+            for j in reversed(range(len(I))):
                 i = I[j]
                 x = list([key for key,val in self["PAT"+str(i)].items()])
                 c = list([PA0[t]/np.mean(self["PAT"+str(i)][t]) for t in x])
                 x,c= zip(*sorted(zip(*(x,c))))
                 #c=[min(1,i) for i in c]
-                ax.plot(x,c,linestyle, color = colo[j+1], label = r'$I=$'+str(i))
+                ax.plot(x,c,lines[j+1], ms=mss[j+1], color = colo[j+1], label = r'$I=$'+str(i))
+        
+        #I=1
+        x = list([key for key,val in self["PAT"].items()])
+        PAT =  list([PA0[t]/np.mean(self["PAT"][t]) for t in x])
+        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        ax.plot(x,PAT,lines[0], ms = mss[0],color = colo[0], label = r'$I=1$')
         
         
         axin = fig.add_subplot(gs[0], sharex = ax)
@@ -712,24 +721,25 @@ class SubTempNet(dict):
         x = list([key for key,val in self["PAT"].items()])
         PAT =  list([np.mean(y)/(self["ncount"]**2) for t,y in self["PAT"].items()])
         x,PAT= zip(*sorted(zip(*(x,PAT))))
-        axin.plot(x,PAT, linestyle, color = colo[0])
+        axin.plot(x,PAT, lines[0],ms = mss[0], color = colo[0])
         if I:
                 for j in range(len(I)):
                     i = I[j]
                     x = list([key for key,val in self["PAT"+str(i)].items()])
                     r = list([np.mean(y)/(self["ncount"]**2) for t,y in self["PAT"+str(i)].items()])
                     x,r= zip(*sorted(zip(*(x,r))))
-                    axin.plot(x,r,linestyle, color = colo[j+1])
+                    axin.plot(x,r,lines[j+1], ms = mss[j+1],color = colo[j+1])
             #I=T
         x = list([key for key,val in self["PA0"].items()])
         PA0 =  list([np.mean(y)/(self["ncount"]**2) for t,y in self["PA0"].items()])
         x,PA0= zip(*sorted(zip(*(x,PA0))))
-        axin.plot(x,PA0, linestyle, color = colo[-1])
-        ax.plot([],[], linestyle, color = colo[-1], label = r'$I=T$')
+        axin.plot(x,PA0, lines[-1], color = colo[-1])
         if vline:
                 for (x,col,label) in vline:
                     axin.vlines(x = x, ymin=0, ymax =axin.set_ylim()[1] , colors = col)
-            
+        
+        if title:
+            axin.set_title(title, fontsize=20)
         if legend:
             try:
                 handles, labels = ax.get_legend_handles_labels()
@@ -744,6 +754,101 @@ class SubTempNet(dict):
         ax.set_xlim(1, ax.set_xlim()[1])
         fig.tight_layout()
         fig.subplots_adjust(hspace=.0)
+        
+        
+        #save plot
+        if save:
+                fig.savefig("fig/"+save, dpi=600)
+        return
+    def plot_il(self, I = False, legend = False,title = False, grid = False, vline = False, save = False, linestyle = "--*", bbox = None): 
+        fig = plt.figure()
+        gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 3]) 
+        ax = fig.add_subplot(gs[1])
+        if vline:
+            for (x,col,label) in vline:
+                ax.vlines(x = x, ymin=0, ymax = 1, colors = col,   label = label)
+        ax.set_xscale("log")
+        ax.set_ylabel(r'$\Xi^I_T$')
+        ax.set_xlabel(r'$T$')
+        
+        if grid:
+            ax.grid()
+        ax.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0])
+        ax.tick_params(which = 'major', axis='both', width=1, length = 10, labelsize=17, direction='in')
+        ax.tick_params(which = 'minor', axis='both', width=1, length = 5, labelsize=17, direction='in')
+        colrange = [1,2,3,4]
+        colo = plt.cm.get_cmap('viridis', len(colrange)).colors
+        lines = ["--*","--o","--D","--v"]
+        mss= [10,7,7,7]
+        #lines = ["*","x","+","."]
+        
+        PA0 =  {t:np.mean(y) for t,y in self["PA0"].items()}
+        ax.plot([],[], lines[-1], color = colo[-1], label = r'$I=T$')
+        
+        if I:
+            colo = plt.cm.get_cmap('viridis', len(I)+2).colors
+            for j in reversed(range(len(I))):
+                i = I[j]
+                x = list([key for key,val in self["PAT"+str(i)].items()])
+                c = list([1-(PA0[t]/np.mean(self["PAT"+str(i)][t])) for t in x])
+                x,c= zip(*sorted(zip(*(x,c))))
+                ax.plot(x,c,lines[j+1], ms=mss[j+1], color = colo[j+1], label = r'$I=$'+str(i))
+        
+        #I=1
+        x = list([key for key,val in self["PAT"].items()])
+        c =  list([1-(PA0[t]/np.mean(self["PAT"][t])) for t in x])
+        x,c= zip(*sorted(zip(*(x,c))))
+        ax.plot(x,c,lines[0], ms = mss[0],color = colo[0], label = r'$I=1$')
+        
+        
+        axin = fig.add_subplot(gs[0], sharex = ax)
+        axin.set_xscale("log")
+        axin.set_ylabel(r'$\rho_T^I$') 
+        if grid:
+            axin.grid()
+        axin.set_yticks([0.2,0.4,0.6,0.8,1.0])
+        #axin.set_yticks([0.1,0.2,0.3,0.4,0.5])#SBM
+        axin.tick_params(which = 'major', axis='both', width=1.1, length = 10, labelsize=17, direction='in')
+        axin.tick_params(which = 'minor', axis='both', width=1.1, length = 5, labelsize=17, direction='in')
+
+        x = list([key for key,val in self["PAT"].items()])
+        PAT =  list([np.mean(y)/(self["ncount"]**2) for t,y in self["PAT"].items()])
+        x,PAT= zip(*sorted(zip(*(x,PAT))))
+        axin.plot(x,PAT, lines[0],ms = mss[0], color = colo[0])
+        if I:
+                for j in range(len(I)):
+                    i = I[j]
+                    x = list([key for key,val in self["PAT"+str(i)].items()])
+                    r = list([np.mean(y)/(self["ncount"]**2) for t,y in self["PAT"+str(i)].items()])
+                    x,r= zip(*sorted(zip(*(x,r))))
+                    axin.plot(x,r,lines[j+1], ms = mss[j+1],color = colo[j+1])
+            #I=T
+        x = list([key for key,val in self["PA0"].items()])
+        PA0 =  list([np.mean(y)/(self["ncount"]**2) for t,y in self["PA0"].items()])
+        x,PA0= zip(*sorted(zip(*(x,PA0))))
+        axin.plot(x,PA0, lines[-1], color = colo[-1])
+
+        if vline:
+                for (x,col,label) in vline:
+                    axin.vlines(x = x, ymin=0, ymax =axin.set_ylim()[1] , colors = col)
+        
+        if title:
+            axin.set_title(title, fontsize=20)
+        if legend:
+            try:
+                handles, labels = ax.get_legend_handles_labels()
+                axin.legend(handles, labels, borderpad = 0.2, handlelength = 0.8, handletextpad=0.2,loc= legend, bbox_to_anchor= bbox)
+                #ax.legend(title = None, title_fontsize = 18, handlelength = 0.8, handletextpad=0.2, loc= legend, bbox_to_anchor= bbox)
+            except:
+                plt.legend(handlelength = 0.8, handletextpad=0.2)
+
+        plt.setp(axin.get_xticklabels(), visible=False)
+        ax.set_xticks([i for i in ax.get_xticks(minor = False) if i > 1 and i < ax.set_xlim()[1]])
+        ax.set_ylim(0, ax.set_ylim()[1])
+        ax.set_xlim(1, ax.set_xlim()[1])
+        fig.tight_layout()
+        fig.subplots_adjust(hspace=.0)
+        
         
         #save plot
         if save:
